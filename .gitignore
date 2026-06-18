@@ -1,0 +1,20 @@
+# ── Never publish: private data / third-party site copies / internal assets ──
+uploads/
+screenshots/
+.thumbnail/
+.thumbnail
+
+# ── Runtime version + sources (the LIVE site is the flattened index.html) ──
+Portfolio.dc.html
+portfolio-flat.html
+support.js
+vendor/
+build-flat.cjs
+
+# ── Old drafts ──
+Portfolio-standalone-src.html
+Amogh Toshniwal - Portfolio.html
+
+# ── OS / editor noise ──
+.DS_Store
+Thumbs.db

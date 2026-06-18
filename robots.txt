@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /uploads/
+Disallow: /vendor/
+
+# Replace with your real domain once hosted:
+# Sitemap: https://your-domain.com/sitemap.xml

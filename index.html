@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Amogh Toshniwal — Web App Security · DFIR · CTF</title>
+<meta name="description" content="Amogh Toshniwal — cybersecurity practitioner focused on web application security and digital forensics. Ranked 18th of 2,200+ teams at Pentathon 2025, with multiple CTF podium finishes.">
+<meta name="author" content="Amogh Toshniwal">
+<meta name="theme-color" content="#0A0B0D">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Amogh Toshniwal — Web App Security · DFIR · CTF">
+<meta property="og:description" content="Cybersecurity practitioner — web application security & digital forensics. Ranked 18th of 2,200+ teams at Pentathon 2025.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Amogh Toshniwal — Web App Security · DFIR · CTF">
+<meta name="twitter:description" content="Cybersecurity practitioner — web application security & digital forensics.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://cdn.jsdelivr.net; connect-src 'self'; base-uri 'self'; form-action 'none'; object-src 'none'; frame-ancestors 'none'">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;}
+html{scroll-behavior:auto;scroll-snap-type:y proximity;scroll-padding-top:0;}
+body{margin:0;background:#0A0B0D;overflow-x:hidden;}
+/* Each top-level block is a full-screen snap target so one section fills the screen at a time */
+[data-snap]{scroll-snap-align:start;}
+::selection{background:oklch(0.83 0.07 216);color:#0A0B0D;}
+::-webkit-scrollbar{width:8px;}
+::-webkit-scrollbar-track{background:#0A0B0D;}
+::-webkit-scrollbar-thumb{background:#1e2228;border:2px solid #0A0B0D;}
+@keyframes mq{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes mqr{0%{transform:translateX(-50%)}100%{transform:translateX(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+@keyframes cue{0%,100%{transform:translateY(0);opacity:.45}50%{transform:translateY(9px);opacity:1}}
+
+/* ════════════════ MENU (three-bar toggle + compact top-right dropdown) ════════════════ */
+.menu-toggle{display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;padding:4px;width:34px;height:30px;}
+.menu-toggle .bars{display:inline-flex;flex-direction:column;justify-content:center;gap:5px;width:24px;height:16px;}
+.menu-toggle .bars span{display:block;height:1.6px;width:100%;background:var(--ink);transition:transform .35s cubic-bezier(.2,.7,.2,1),opacity .25s;}
+.menu-toggle.open .bars span:nth-child(1){transform:translateY(6.6px) rotate(45deg);}
+.menu-toggle.open .bars span:nth-child(2){opacity:0;}
+.menu-toggle.open .bars span:nth-child(3){transform:translateY(-6.6px) rotate(-45deg);}
+
+.menu-overlay{position:fixed;top:62px;right:24px;z-index:45;width:min(260px,80vw);background:transparent;padding:6px 0;opacity:0;visibility:hidden;transform:translateY(-10px) scale(0.98);transform-origin:top right;transition:opacity .26s ease,transform .26s cubic-bezier(.2,.7,.2,1),visibility .26s;}
+.menu-overlay.open{opacity:1;visibility:visible;transform:translateY(0) scale(1);}
+.menu-list{display:flex;flex-direction:column;gap:1px;width:100%;}
+.menu-item{display:flex;align-items:center;gap:6px;text-decoration:none;color:var(--ink);overflow:hidden;padding:9px 11px;}
+.menu-arrow{display:inline-flex;align-items:center;color:var(--acc);font-size:17px;transform:translateX(-130%);opacity:0;transition:transform .28s ease-out,opacity .28s ease-out;flex:none;}
+.menu-label{font-family:'Archivo',sans-serif;font-weight:700;font-size:18px;letter-spacing:-0.01em;line-height:1.1;transform:translateX(-23px);transition:transform .28s ease-out,color .28s ease-out;}
+.menu-item:hover .menu-arrow,.menu-item:focus-visible .menu-arrow{transform:translateX(0);opacity:1;}
+.menu-item:hover .menu-label,.menu-item:focus-visible .menu-label{transform:translateX(0);color:var(--acc);}
+
+/* ════════════════ RESPONSIVE / MOBILE ════════════════ */
+/* The desktop layout uses inline styles, fixed paddings, multi-column grids and
+   three scroll-jacked sections. On phones we override those (!important beats inline),
+   turn off scroll-snap, and convert the scroll-jack sections to natural vertical stacks. */
+@media (max-width:860px){
+  html{scroll-snap-type:none !important;}
+  section[data-snap]{height:auto !important;min-height:100vh;}
+
+  /* tighten the standard 48px gutter wherever it is set inline */
+  [style*="padding:0 48px"]{padding-left:20px !important;padding-right:20px !important;}
+  [style*="padding:18px 48px"]{padding-left:20px !important;padding-right:20px !important;}
+
+  /* header + swipeable nav */
+  header{padding:12px 16px !important;}
+  header nav{gap:14px !important;overflow-x:auto;overflow-y:hidden;max-width:64vw;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  header nav::-webkit-scrollbar{display:none;}
+
+  /* grids → single column */
+  [style*="grid-template-columns:1.35fr 1fr"]{grid-template-columns:1fr !important;gap:26px !important;}
+  [style*="grid-template-columns:110px 1fr auto"]{grid-template-columns:1fr !important;gap:8px !important;}
+  [style*="grid-template-columns:200px 1fr auto"]{grid-template-columns:1fr !important;gap:10px !important;}
+
+  #about{height:auto !important;padding-top:60px !important;}
+
+  /* WORK: horizontal scroll-jack → vertical stack */
+  #work{height:auto !important;}
+  #work .sticky-pane{position:static !important;height:auto !important;}
+  #work .h-track{flex-direction:column !important;transform:none !important;}
+  #work .h-track > div{width:100% !important;min-width:0 !important;border-right:none !important;border-bottom:1px solid var(--line) !important;padding:44px 20px !important;}
+
+  /* AWARDS: split-flip → stacked cards, ordered IMAGE then TEXT per award */
+  #awards{height:auto !important;}
+  #awards .sticky-pane{position:static !important;height:auto !important;overflow:visible !important;display:flex !important;flex-direction:column !important;}
+  #awards [data-award-left],#awards [data-award-right]{position:relative !important;left:auto !important;width:100% !important;height:auto !important;transform:none !important;border:none !important;align-items:flex-start !important;text-align:left !important;padding:36px 20px !important;}
+  #awards [data-award-left]:has(img),#awards [data-award-right]:has(img){min-height:64vw !important;padding:0 !important;}
+  #awards .award-label{position:static !important;padding:16px 20px 0 !important;order:-1 !important;}
+  #awards .award-counter{display:none !important;}
+  /* per-award: image block first, then its text block */
+  #awards [data-award-left="0"]{order:0 !important;}  #awards [data-award-right="0"]{order:1 !important;}
+  #awards [data-award-right="1"]{order:2 !important;}  #awards [data-award-left="1"]{order:3 !important;}
+  #awards [data-award-left="2"]{order:4 !important;}  #awards [data-award-right="2"]{order:5 !important;}
+  #awards [data-award-right="3"]{order:6 !important;}  #awards [data-award-left="3"]{order:7 !important;}
+
+  /* DISCIPLINES: scroll-driven → CSS auto marquee */
+  #arsenal{height:auto !important;}
+  #arsenal .sticky-pane{position:static !important;height:auto !important;padding:24px 0 40px !important;gap:14px !important;}
+  #arsenal .disc-label{position:static !important;padding:80px 20px 8px !important;}
+  #arsenal .disc-row{font-size:clamp(34px,11vw,66px) !important;animation:mq 32s linear infinite;}
+  #arsenal .disc-row-2{animation:mqr 28s linear infinite;}
+
+  #contact{height:auto !important;padding-bottom:48px !important;}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:0.001ms !important;animation-iteration-count:1 !important;}
+}
+
+.proj-card:hover{background:rgba(233,236,239,0.012);}
+.cert-card:hover{background:var(--panel);}
+.social-ico:hover{filter:invert(1);}
+</style>
+<script src="./app.js" defer></script>
+</head>
+<body>
+<div id="top" style="--bg:#0A0B0D;--ink:#E9ECEF;--ink2:#9DA3AB;--ink3:#5C636C;--line:rgba(233,236,239,0.09);--line2:rgba(233,236,239,0.045);--acc:oklch(0.83 0.07 216);--panel:#0E1116;position:relative;min-height:100vh;background:var(--bg);color:var(--ink);font-family:'Archivo',-apple-system,sans-serif;overflow-x:clip;">
+
+  <canvas id="flux" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
+  <div style="position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(130% 90% at 50% 0%,rgba(10,11,13,0) 30%,rgba(10,11,13,0.72) 100%);"></div>
+
+  <!-- Page progress bar -->
+  <div style="position:fixed;top:0;left:0;right:0;height:1px;z-index:30;">
+    <div id="progress" style="height:100%;background:var(--acc);transform:scaleX(0);transform-origin:0 50%;box-shadow:0 0 8px var(--acc);"></div>
+  </div>
+
+  <!-- Top bar: name + menu toggle -->
+  <header style="position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:22px 48px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);background:linear-gradient(to bottom,rgba(10,11,13,0.75) 0%,rgba(10,11,13,0) 100%);">
+    <a href="#top" style="text-decoration:none;display:flex;align-items:center;gap:12px;">
+      <span style="font-weight:800;letter-spacing:-0.01em;color:var(--ink);font-size:14px;">AMOGH TOSHNIWAL</span>
+    </a>
+    <button type="button" data-menu-toggle class="menu-toggle" aria-label="Toggle menu" aria-expanded="false">
+      <span class="bars"><span></span><span></span><span></span></span>
+    </button>
+  </header>
+
+  <!-- Full-screen vertical menu -->
+  <div data-menu-overlay class="menu-overlay" role="dialog" aria-modal="true" aria-label="Site menu">
+    <nav class="menu-list">
+      
+        <a data-menu-link href="#about" class="menu-item">
+          <span class="menu-arrow"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+          <span class="menu-label">ABOUT</span>
+        </a>
+      
+        <a data-menu-link href="#arsenal" class="menu-item">
+          <span class="menu-arrow"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+          <span class="menu-label">ARSENAL</span>
+        </a>
+      
+        <a data-menu-link href="#work" class="menu-item">
+          <span class="menu-arrow"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+          <span class="menu-label">WORK</span>
+        </a>
+      
+        <a data-menu-link href="#awards" class="menu-item">
+          <span class="menu-arrow"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+          <span class="menu-label">AWARDS</span>
+        </a>
+      
+        <a data-menu-link href="#patents" class="menu-item">
+          <span class="menu-arrow"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+          <span class="menu-label">PATENTS</span>
+        </a>
+      
+        <a data-menu-link href="#leadership" class="menu-item">
+          <span class="menu-arrow"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+          <span class="menu-label">LEADERSHIP</span>
+        </a>
+      
+        <a data-menu-link href="#certs" class="menu-item">
+          <span class="menu-arrow"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+          <span class="menu-label">CERTS</span>
+        </a>
+      
+        <a data-menu-link href="#contact" class="menu-item">
+          <span class="menu-arrow"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+          <span class="menu-label">CONTACT</span>
+        </a>
+      
+    </nav>
+  </div>
+
+  <main style="position:relative;z-index:2;">
+
+    <!-- ════════════════ HERO ════════════════ -->
+    <section data-snap="" style="height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 0 90px;position:relative;overflow:hidden;">
+
+      <!-- Ghost watermark -->
+      <div style="position:absolute;bottom:-60px;left:-30px;font-size:clamp(200px,26vw,420px);font-weight:900;letter-spacing:-0.06em;line-height:1;color:rgba(233,236,239,0.022);pointer-events:none;white-space:nowrap;user-select:none;">AT</div>
+
+      <!-- Parallax content wrapper -->
+      <div data-hero-content="" style="max-width:1200px;margin:0 auto;padding:0 48px;width:100%;">
+
+        <!-- Label -->
+        <div data-reveal="" style="opacity:0;transform:translateY(16px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.26em;color:var(--acc);margin-bottom:40px;">WEB APPLICATION SECURITY · DIGITAL FORENSICS · OFFENSIVE TOOLING</div>
+
+        <!-- Name — wipe-up per line -->
+        <div style="margin-bottom:44px;">
+          <div style="overflow:hidden;line-height:0.88;">
+            <div data-wipe="" style="font-size:clamp(70px,11.5vw,168px);font-weight:900;letter-spacing:-0.05em;line-height:0.88;transform:translateY(108%);transition:transform 1.15s cubic-bezier(.16,1,.3,1);">AMOGH</div>
+          </div>
+          <div style="overflow:hidden;line-height:0.88;margin-top:6px;">
+            <div data-wipe="" data-wipe-delay="95" style="font-size:clamp(70px,11.5vw,168px);font-weight:900;letter-spacing:-0.05em;line-height:0.88;transform:translateY(108%);transition:transform 1.15s cubic-bezier(.16,1,.3,1) 95ms;">TOSHNIWAL</div>
+          </div>
+        </div>
+
+        <!-- Tagline row -->
+        <div style="display:flex;align-items:flex-start;gap:64px;flex-wrap:wrap;">
+          <p data-reveal="" style="opacity:0;transform:translateY(14px);transition:opacity .8s cubic-bezier(.2,.7,.2,1) .2s,transform .8s cubic-bezier(.2,.7,.2,1) .2s;max-width:500px;margin:0;font-size:clamp(15px,1.35vw,18px);line-height:1.65;color:var(--ink2);text-wrap:pretty;">I find and exploit weaknesses across web applications, binaries, and forensic artifacts — then engineer them out. Ranked <span style="color:var(--ink);font-weight:600;">18th of 2,200+ teams</span> at Pentathon 2025.</p>
+
+          <!-- Stats -->
+          <div data-reveal="" style="opacity:0;transform:translateY(14px);transition:opacity .8s cubic-bezier(.2,.7,.2,1) .35s,transform .8s cubic-bezier(.2,.7,.2,1) .35s;display:flex;gap:44px;flex-wrap:wrap;">
+            
+              <div style="display:flex;flex-direction:column;gap:5px;">
+                <span style="font-size:clamp(28px,3vw,44px);font-weight:800;letter-spacing:-0.025em;line-height:1;color:var(--acc);">18</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.16em;color:var(--ink3);text-transform:uppercase;">PENTATHON 2025 RANK</span>
+              </div>
+            
+              <div style="display:flex;flex-direction:column;gap:5px;">
+                <span style="font-size:clamp(28px,3vw,44px);font-weight:800;letter-spacing:-0.025em;line-height:1;color:var(--acc);">04</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.16em;color:var(--ink3);text-transform:uppercase;">CTF PODIUMS</span>
+              </div>
+            
+              <div style="display:flex;flex-direction:column;gap:5px;">
+                <span style="font-size:clamp(28px,3vw,44px);font-weight:800;letter-spacing:-0.025em;line-height:1;color:var(--acc);">9.06</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.16em;color:var(--ink3);text-transform:uppercase;">CGPA · B.TECH CSE</span>
+              </div>
+            
+              <div style="display:flex;flex-direction:column;gap:5px;">
+                <span style="font-size:clamp(28px,3vw,44px);font-weight:800;letter-spacing:-0.025em;line-height:1;color:var(--acc);">03</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.16em;color:var(--ink3);text-transform:uppercase;">PATENTS FILED</span>
+              </div>
+            
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Scroll cue -->
+      <div style="position:absolute;bottom:34px;left:48px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--ink3);display:flex;align-items:center;gap:8px;">SCROLL<span style="display:inline-block;animation:cue 1.9s ease-in-out infinite;">↓</span></div>
+
+      <!-- Vertical tag -->
+      <div style="position:absolute;right:48px;bottom:34px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;color:var(--ink3);writing-mode:vertical-lr;transform:rotate(180deg);">PUNE · 18.52°N / 73.85°E</div>
+    </section>
+
+    <!-- ════════════════ ABOUT (full screen — top marquee, About, bottom marquee) ════════════════ -->
+    <section id="about" data-section="about" data-snap="" style="height:100vh;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;padding-top:66px;">
+
+      <!-- Top marquee -->
+      <div style="border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:11px 0;overflow:hidden;background:rgba(10,11,13,0.6);flex:none;">
+        <div style="display:inline-flex;white-space:nowrap;animation:mq 26s linear infinite;will-change:transform;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.13em;color:var(--ink3);">AMOGH TOSHNIWAL &nbsp;·&nbsp; WEB APP SECURITY &nbsp;·&nbsp; DIGITAL FORENSICS &nbsp;·&nbsp; CTF COMPETITOR &nbsp;·&nbsp; PENTATHON '25 &nbsp;·&nbsp; RANK 18 / 2,200+ TEAMS &nbsp;·&nbsp; REVERSE ENGINEERING &nbsp;·&nbsp; CRYPTOGRAPHY &nbsp;·&nbsp; STEGANOGRAPHY &nbsp;·&nbsp; OFFENSIVE TOOLING &nbsp;·&nbsp; PUNE, INDIA &nbsp;·&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.13em;color:var(--ink3);">AMOGH TOSHNIWAL &nbsp;·&nbsp; WEB APP SECURITY &nbsp;·&nbsp; DIGITAL FORENSICS &nbsp;·&nbsp; CTF COMPETITOR &nbsp;·&nbsp; PENTATHON '25 &nbsp;·&nbsp; RANK 18 / 2,200+ TEAMS &nbsp;·&nbsp; REVERSE ENGINEERING &nbsp;·&nbsp; CRYPTOGRAPHY &nbsp;·&nbsp; STEGANOGRAPHY &nbsp;·&nbsp; OFFENSIVE TOOLING &nbsp;·&nbsp; PUNE, INDIA &nbsp;·&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        </div>
+      </div>
+
+      <!-- About content (vertically centred) -->
+      <div style="flex:1;display:flex;align-items:center;overflow:hidden;">
+        <div style="max-width:1200px;margin:0 auto;padding:18px 48px;width:100%;">
+
+          <div data-reveal="" style="opacity:0;transform:translateY(14px);transition:opacity .7s,transform .7s;display:flex;align-items:center;gap:16px;margin-bottom:clamp(20px,3.2vh,38px);">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--acc);">01</span>
+            <div style="flex:1;height:1px;background:var(--line);"></div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;color:var(--ink3);">ABOUT</span>
+          </div>
+
+          <!-- Big statement — wipe per line -->
+          <div style="margin-bottom:clamp(22px,3.6vh,44px);">
+            <div style="overflow:hidden;">
+              <p data-wipe="" style="font-size:clamp(24px,3.2vw,46px);font-weight:700;letter-spacing:-0.022em;line-height:1.16;margin:0 0 2px;transform:translateY(108%);transition:transform 1s cubic-bezier(.16,1,.3,1);text-wrap:pretty;">A cybersecurity practitioner with</p>
+            </div>
+            <div style="overflow:hidden;">
+              <p data-wipe="" data-wipe-delay="55" style="font-size:clamp(24px,3.2vw,46px);font-weight:700;letter-spacing:-0.022em;line-height:1.16;margin:0 0 2px;transform:translateY(108%);transition:transform 1s cubic-bezier(.16,1,.3,1) 55ms;text-wrap:pretty;">a focused interest in web security</p>
+            </div>
+            <div style="overflow:hidden;">
+              <p data-wipe="" data-wipe-delay="110" style="font-size:clamp(24px,3.2vw,46px);font-weight:700;letter-spacing:-0.022em;line-height:1.16;margin:0;transform:translateY(108%);transition:transform 1s cubic-bezier(.16,1,.3,1) 110ms;color:var(--acc);text-wrap:pretty;">and digital forensics.</p>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1.35fr 1fr;gap:clamp(32px,5vw,72px);">
+            <p data-reveal="" style="opacity:0;transform:translateY(14px);transition:opacity .8s,transform .8s;font-size:clamp(14px,1.1vw,17px);line-height:1.65;color:var(--ink2);margin:0;text-wrap:pretty;">Competition experience is paired with engineering depth: building cloud-deployed automation, secure storage systems, and the tooling that makes security work repeatable. Recent work spans an agentic evaluation pipeline on Google Cloud and a zero-knowledge password manager.</p>
+            <div data-reveal="" style="opacity:0;transform:translateY(14px);transition:opacity .8s .12s,transform .8s .12s;display:flex;flex-direction:column;">
+              <div style="border-top:1px solid var(--line);padding:13px 0;">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;color:var(--ink3);margin-bottom:7px;">EDUCATION</div>
+                <div style="font-size:16px;font-weight:600;">B.Tech, Computer Engineering</div>
+                <div style="font-size:14px;color:var(--ink2);margin-top:3px;">Vishwakarma Institute of Technology</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--acc);margin-top:6px;">CGPA 9.06 · 2024–2028</div>
+              </div>
+              <div style="border-top:1px solid var(--line);padding:13px 0;">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;color:var(--ink3);margin-bottom:7px;">FOCUS</div>
+                <div style="font-size:15px;">Web App Security · DFIR · CTF</div>
+              </div>
+              <div style="border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:13px 0;">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;color:var(--ink3);margin-bottom:7px;">BASE · LANGUAGES</div>
+                <div style="font-size:15px;">Pune, India · EN / HI / MR</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom marquee -->
+      <div style="border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:13px 0;overflow:hidden;background:rgba(10,11,13,0.6);flex:none;">
+        <div style="display:inline-flex;white-space:nowrap;animation:mqr 20s linear infinite;will-change:transform;">
+          <span style="font-family:'Archivo',sans-serif;font-size:14px;font-weight:700;letter-spacing:0.05em;color:rgba(233,236,239,0.14);">PYTHON &nbsp;·&nbsp; BASH &nbsp;·&nbsp; SQL &nbsp;·&nbsp; BURP SUITE &nbsp;·&nbsp; WIRESHARK &nbsp;·&nbsp; METASPLOIT &nbsp;·&nbsp; VOLATILITY &nbsp;·&nbsp; GHIDRA &nbsp;·&nbsp; NMAP &nbsp;·&nbsp; AES-256 &nbsp;·&nbsp; PBKDF2 &nbsp;·&nbsp; JAVASCRIPT &nbsp;·&nbsp; C / C++ &nbsp;·&nbsp; GOOGLE CLOUD &nbsp;·&nbsp; MCP &nbsp;·&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+          <span style="font-family:'Archivo',sans-serif;font-size:14px;font-weight:700;letter-spacing:0.05em;color:rgba(233,236,239,0.14);">PYTHON &nbsp;·&nbsp; BASH &nbsp;·&nbsp; SQL &nbsp;·&nbsp; BURP SUITE &nbsp;·&nbsp; WIRESHARK &nbsp;·&nbsp; METASPLOIT &nbsp;·&nbsp; VOLATILITY &nbsp;·&nbsp; GHIDRA &nbsp;·&nbsp; NMAP &nbsp;·&nbsp; AES-256 &nbsp;·&nbsp; PBKDF2 &nbsp;·&nbsp; JAVASCRIPT &nbsp;·&nbsp; C / C++ &nbsp;·&nbsp; GOOGLE CLOUD &nbsp;·&nbsp; MCP &nbsp;·&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ════════════════ DISCIPLINES — scroll-driven double marquee ════════════════ -->
+    <div id="arsenal" data-section="arsenal" data-snap="" style="position:relative;height:200vh;">
+      <div class="sticky-pane" style="position:sticky;top:0;height:100vh;overflow:hidden;display:flex;flex-direction:column;justify-content:center;gap:clamp(8px,1.6vh,22px);">
+
+        <!-- Section label -->
+        <div class="disc-label" style="position:absolute;top:0;left:0;right:0;z-index:5;padding:90px 48px 0;display:flex;align-items:center;gap:16px;pointer-events:none;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--acc);">02</span>
+          <div style="flex:1;height:1px;background:var(--line);"></div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;color:var(--ink3);">DISCIPLINES</span>
+        </div>
+
+        <!-- Row 1 — solid, drifts left on scroll -->
+        <div id="disc-row-1" class="disc-row" style="display:flex;white-space:nowrap;will-change:transform;font-weight:900;font-size:clamp(46px,8.5vw,128px);letter-spacing:-0.035em;line-height:1.04;color:var(--ink);">
+          <span>CYBERSECURITY&nbsp;·&nbsp;WEB SECURITY&nbsp;·&nbsp;DIGITAL FORENSICS&nbsp;·&nbsp;REVERSE ENGINEERING&nbsp;·&nbsp;CRYPTOGRAPHY&nbsp;·&nbsp;STEGANOGRAPHY&nbsp;·&nbsp;PROGRAMMING&nbsp;·&nbsp;</span>
+          <span>CYBERSECURITY&nbsp;·&nbsp;WEB SECURITY&nbsp;·&nbsp;DIGITAL FORENSICS&nbsp;·&nbsp;REVERSE ENGINEERING&nbsp;·&nbsp;CRYPTOGRAPHY&nbsp;·&nbsp;STEGANOGRAPHY&nbsp;·&nbsp;PROGRAMMING&nbsp;·&nbsp;</span>
+        </div>
+
+        <!-- Row 2 — outlined accent, drifts right on scroll -->
+        <div id="disc-row-2" class="disc-row disc-row-2" style="display:flex;white-space:nowrap;will-change:transform;font-weight:900;font-size:clamp(46px,8.5vw,128px);letter-spacing:-0.035em;line-height:1.04;color:transparent;-webkit-text-stroke:1.4px var(--acc);">
+          <span>VULNERABILITY RESEARCH&nbsp;·&nbsp;EXPLOIT DEV&nbsp;·&nbsp;MALWARE ANALYSIS&nbsp;·&nbsp;OSINT&nbsp;·&nbsp;NETWORK SECURITY&nbsp;·&nbsp;THREAT HUNTING&nbsp;·&nbsp;OFFENSIVE TOOLING&nbsp;·&nbsp;</span>
+          <span>VULNERABILITY RESEARCH&nbsp;·&nbsp;EXPLOIT DEV&nbsp;·&nbsp;MALWARE ANALYSIS&nbsp;·&nbsp;OSINT&nbsp;·&nbsp;NETWORK SECURITY&nbsp;·&nbsp;THREAT HUNTING&nbsp;·&nbsp;OFFENSIVE TOOLING&nbsp;·&nbsp;</span>
+        </div>
+
+        <!-- Hint -->
+        <div style="position:absolute;bottom:34px;left:0;right:0;text-align:center;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;color:var(--ink3);pointer-events:none;">SCROLL ↓</div>
+      </div>
+    </div>
+
+    <!-- ════════════════ PROJECTS — horizontal sticky scroll ════════════════ -->
+    <div id="work" data-section="work" data-snap="" style="position:relative;">
+      <div class="sticky-pane" style="position:sticky;top:0;height:100vh;overflow:hidden;display:flex;flex-direction:column;">
+
+        <!-- Sticky header -->
+        <div style="padding:100px 48px 28px;flex:none;display:flex;align-items:center;gap:16px;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--acc);">03</span>
+          <div style="flex:1;height:1px;background:var(--line);"></div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;color:var(--ink3);">SELECTED WORK &nbsp;·&nbsp; SCROLL →</span>
+        </div>
+
+        <!-- Horizontal track -->
+        <div id="proj-track" class="h-track" style="display:flex;align-items:stretch;flex:1;will-change:transform;">
+
+          <!-- Intro card -->
+          <div style="flex:none;width:36vw;min-width:360px;display:flex;flex-direction:column;justify-content:flex-end;padding:0 48px 80px;border-right:1px solid var(--line);position:relative;overflow:hidden;">
+            <div style="position:absolute;top:20px;right:-16px;font-size:clamp(160px,18vw,260px);font-weight:900;letter-spacing:-0.07em;line-height:1;color:rgba(233,236,239,0.032);pointer-events:none;user-select:none;">03</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.24em;color:var(--ink3);margin-bottom:18px;">SELECTED</div>
+            <h2 style="font-size:clamp(52px,6.5vw,96px);font-weight:900;letter-spacing:-0.045em;line-height:0.88;margin:0 0 28px;">WORK</h2>
+            <p style="font-size:15px;line-height:1.65;color:var(--ink2);margin:0 0 28px;max-width:300px;text-wrap:pretty;">Two featured builds — spanning agentic AI infrastructure and zero-knowledge security.</p>
+            <div style="display:flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;color:var(--acc);">DRAG OR SCROLL &nbsp;→</div>
+          </div>
+
+          <!-- Project 01 -->
+          <div style="flex:none;width:70vw;min-width:580px;display:flex;flex-direction:column;justify-content:flex-end;padding:0 60px 80px;border-right:1px solid var(--line);position:relative;overflow:hidden;" class="proj-card">
+            <div style="position:absolute;top:24px;right:44px;font-size:clamp(110px,13vw,200px);font-weight:900;letter-spacing:-0.07em;line-height:1;color:var(--acc);opacity:0.055;pointer-events:none;user-select:none;">01</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;color:var(--ink3);margin-bottom:14px;">MCP · SLM · GOOGLE CLOUD &nbsp;·&nbsp; FEB — JUN 2025</div>
+            <h3 style="font-size:clamp(26px,3.2vw,46px);font-weight:800;letter-spacing:-0.022em;line-height:1.1;margin:0 0 22px;max-width:540px;text-wrap:pretty;">Agentic AI Framework for Project Evaluation</h3>
+            <p style="font-size:15px;line-height:1.68;color:var(--ink2);margin:0 0 26px;max-width:560px;text-wrap:pretty;">End-to-end automation pipeline built on the Model Context Protocol and Small Language Models, deployed on Google Cloud for comprehensive, repeatable project evaluation.</p>
+            <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:26px;">
+              <div style="display:flex;gap:12px;align-items:flex-start;"><span style="color:var(--acc);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.6;flex:none;">→</span><span style="font-size:14px;line-height:1.6;">Reduced evaluation turnaround by 50% through optimised task routing and parallelised inference.</span></div>
+              <div style="display:flex;gap:12px;align-items:flex-start;"><span style="color:var(--acc);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.6;flex:none;">→</span><span style="font-size:14px;line-height:1.6;">Implemented CI/CD workflows and cloud resource management for high pipeline availability.</span></div>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:7px;">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.06em;color:var(--ink3);border:1px solid var(--line);padding:4px 10px;">MCP</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.06em;color:var(--ink3);border:1px solid var(--line);padding:4px 10px;">SLM</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.06em;color:var(--ink3);border:1px solid var(--line);padding:4px 10px;">GCP</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.06em;color:var(--ink3);border:1px solid var(--line);padding:4px 10px;">CI/CD</span>
+            </div>
+          </div>
+
+          <!-- Project 02 -->
+          <div style="flex:none;width:70vw;min-width:580px;display:flex;flex-direction:column;justify-content:flex-end;padding:0 60px 80px;position:relative;overflow:hidden;" class="proj-card">
+            <div style="position:absolute;top:24px;right:44px;font-size:clamp(110px,13vw,200px);font-weight:900;letter-spacing:-0.07em;line-height:1;color:var(--acc);opacity:0.055;pointer-events:none;user-select:none;">02</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;color:var(--ink3);margin-bottom:14px;">AES-256 · ZERO-KNOWLEDGE &nbsp;·&nbsp; SEP 2025</div>
+            <h3 style="font-size:clamp(26px,3.2vw,46px);font-weight:800;letter-spacing:-0.022em;line-height:1.1;margin:0 0 22px;max-width:540px;text-wrap:pretty;">Hasheger — Secure Cross-Platform Password Manager</h3>
+            <p style="font-size:15px;line-height:1.68;color:var(--ink2);margin:0 0 26px;max-width:560px;text-wrap:pretty;">Multi-platform password manager architected around a zero-knowledge storage model and AES-256 encryption, validated against industry password standards.</p>
+            <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:26px;">
+              <div style="display:flex;gap:12px;align-items:flex-start;"><span style="color:var(--acc);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.6;flex:none;">→</span><span style="font-size:14px;line-height:1.6;">Led security testing and compliance validation against NIST SP 800-63 password guidelines.</span></div>
+              <div style="display:flex;gap:12px;align-items:flex-start;"><span style="color:var(--acc);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.6;flex:none;">→</span><span style="font-size:14px;line-height:1.6;">Implemented PBKDF2 key derivation with salted hashing to protect credentials at rest.</span></div>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:7px;">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.06em;color:var(--ink3);border:1px solid var(--line);padding:4px 10px;">AES-256</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.06em;color:var(--ink3);border:1px solid var(--line);padding:4px 10px;">PBKDF2</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.06em;color:var(--ink3);border:1px solid var(--line);padding:4px 10px;">NIST 800-63</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.06em;color:var(--ink3);border:1px solid var(--line);padding:4px 10px;">Zero-Knowledge</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Horizontal progress indicator -->
+        <div style="padding:16px 48px 20px;flex:none;display:flex;align-items:center;gap:14px;">
+          <div style="flex:1;height:1px;background:var(--line2);">
+            <div id="proj-progress" style="height:100%;background:var(--acc);width:0%;box-shadow:0 0 6px var(--acc);"></div>
+          </div>
+          <span id="proj-count" style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.14em;color:var(--ink3);">01 / 02</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════════════════ AWARDS — split-screen ════════════════ -->
+    <div id="awards" data-section="awards" data-snap="" style="position:relative;height:500vh;">
+      <div class="sticky-pane" style="position:sticky;top:0;height:100vh;overflow:hidden;background:transparent;">
+
+        <!-- Section label -->
+        <div class="award-label" style="position:absolute;top:0;left:0;right:0;z-index:10;padding:84px 48px 0;display:flex;align-items:center;gap:16px;pointer-events:none;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--acc);">04</span>
+          <div style="flex:1;height:1px;background:var(--line);"></div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;color:var(--ink3);">AWARDS &amp; CTF</span>
+        </div>
+
+        <!-- ── Card 0 · Pentathon 2025 · image LEFT / text RIGHT ── -->
+        <div data-award-left="0" style="position:absolute;top:0;left:0;width:50%;height:100%;transform:translateY(0);overflow:hidden;background:#0b0e11;">
+          <img src="./photos/pentathon-2025.jpg" alt="Pentathon 2025" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;background:#0b0e11;z-index:1;border-right:1px solid var(--line);">
+          <div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;border-right:1px solid var(--line);">
+            <svg width="52" height="52" viewBox="0 0 52 52" fill="none"><rect x="1" y="1" width="50" height="50" rx="4" stroke="rgba(233,236,239,0.09)" stroke-width="1"></rect><circle cx="18" cy="17" r="5.5" stroke="rgba(233,236,239,0.09)" stroke-width="1"></circle><path d="M4 38l13-13 10 10 8-10 15 13" stroke="rgba(233,236,239,0.09)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;color:var(--ink3);">PENTATHON_2025.jpg</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.14em;color:rgba(233,236,239,0.18);">REPLACE WITH YOUR IMAGE</span>
+          </div>
+        </div>
+        <div data-award-right="0" style="position:absolute;top:0;left:50%;width:50%;height:100%;transform:translateY(0);overflow:hidden;background:transparent;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:80px 64px;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.24em;color:var(--acc);margin-bottom:22px;">NATIONAL CYBERSECURITY COMPETITION</span>
+          <div style="font-size:clamp(72px,10vw,140px);font-weight:900;letter-spacing:-0.05em;line-height:0.82;color:var(--acc);margin-bottom:18px;">18</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;color:var(--ink3);margin-bottom:24px;">OF 2,200+ TEAMS</div>
+          <h3 style="font-size:clamp(26px,3.2vw,46px);font-weight:800;letter-spacing:-0.022em;margin:0 0 16px;line-height:1.1;">Pentathon 2025</h3>
+          <p style="font-size:15px;line-height:1.68;color:var(--ink2);margin:0 0 14px;max-width:400px;text-wrap:pretty;">Ranked 18th nationally across web exploitation, reverse engineering, cryptography, steganography, and forensics.</p>
+          <p style="font-size:13px;line-height:1.65;color:var(--ink3);margin:0;max-width:400px;text-wrap:pretty;">Pentathon is a national-level CTF organized by <span style="color:var(--ink2);">NCIIPC India</span> (a unit of NTRO) and the <span style="color:var(--ink2);">All India Council for Technical Education (AICTE)</span>.</p>
+        </div>
+
+        <!-- ── Card 1 · ByteMe CTF · text LEFT / image RIGHT ── -->
+        <div data-award-left="1" style="position:absolute;top:0;left:0;width:50%;height:100%;transform:translateY(100%);overflow:hidden;background:transparent;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding:80px 64px;text-align:right;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.24em;color:var(--acc);margin-bottom:22px;">PCCOE, PUNE</span>
+          <div style="font-size:clamp(72px,10vw,140px);font-weight:900;letter-spacing:-0.05em;line-height:0.82;color:var(--acc);margin-bottom:18px;">1ST</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;color:var(--ink3);margin-bottom:24px;">FIRST PLACE</div>
+          <h3 style="font-size:clamp(26px,3.2vw,46px);font-weight:800;letter-spacing:-0.022em;margin:0 0 16px;line-height:1.1;">ByteMe CTF 2026</h3>
+          <p style="font-size:15px;line-height:1.68;color:var(--ink2);margin:0;max-width:380px;text-wrap:pretty;">First place at ByteMe Capture The Flag, outscoring all competing teams across every challenge category.</p>
+        </div>
+        <div data-award-right="1" style="position:absolute;top:0;left:50%;width:50%;height:100%;transform:translateY(-100%);overflow:hidden;background:#0b0e11;">
+          <img src="./photos/byteme-ctf-2026.jpg" alt="ByteMe CTF 2026" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;border-left:1px solid var(--line);">
+          <div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;border-left:1px solid var(--line);">
+            <svg width="52" height="52" viewBox="0 0 52 52" fill="none"><rect x="1" y="1" width="50" height="50" rx="4" stroke="rgba(233,236,239,0.09)" stroke-width="1"></rect><circle cx="18" cy="17" r="5.5" stroke="rgba(233,236,239,0.09)" stroke-width="1"></circle><path d="M4 38l13-13 10 10 8-10 15 13" stroke="rgba(233,236,239,0.09)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;color:var(--ink3);">BYTEME_CTF_2026.jpg</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.14em;color:rgba(233,236,239,0.18);">REPLACE WITH YOUR IMAGE</span>
+          </div>
+        </div>
+
+        <!-- ── Card 2 · Commit 1.0 · image LEFT / text RIGHT ── -->
+        <div data-award-left="2" style="position:absolute;top:0;left:0;width:50%;height:100%;transform:translateY(100%);overflow:hidden;background:#0b0e11;">
+          <img src="./photos/commit-1-hackathon.jpg" alt="Commit 1.0 Hackathon" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;border-right:1px solid var(--line);">
+          <div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;border-right:1px solid var(--line);">
+            <svg width="52" height="52" viewBox="0 0 52 52" fill="none"><rect x="1" y="1" width="50" height="50" rx="4" stroke="rgba(233,236,239,0.09)" stroke-width="1"></rect><circle cx="18" cy="17" r="5.5" stroke="rgba(233,236,239,0.09)" stroke-width="1"></circle><path d="M4 38l13-13 10 10 8-10 15 13" stroke="rgba(233,236,239,0.09)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;color:var(--ink3);">COMMIT_1_HACKATHON.jpg</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.14em;color:rgba(233,236,239,0.18);">REPLACE WITH YOUR IMAGE</span>
+          </div>
+        </div>
+        <div data-award-right="2" style="position:absolute;top:0;left:50%;width:50%;height:100%;transform:translateY(-100%);overflow:hidden;background:transparent;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:80px 64px;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.24em;color:var(--acc);margin-bottom:22px;">NMIMS, MUMBAI</span>
+          <div style="font-size:clamp(72px,10vw,140px);font-weight:900;letter-spacing:-0.05em;line-height:0.82;color:var(--acc);margin-bottom:18px;">1ST</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;color:var(--ink3);margin-bottom:24px;">RUNNER-UP</div>
+          <h3 style="font-size:clamp(26px,3.2vw,46px);font-weight:800;letter-spacing:-0.022em;margin:0 0 16px;line-height:1.1;">Commit 1.0 Hackathon</h3>
+          <p style="font-size:15px;line-height:1.68;color:var(--ink2);margin:0;max-width:380px;text-wrap:pretty;">First runner-up at Commit 1.0, NMIMS Mumbai — built and presented a standout project ahead of all competing teams.</p>
+        </div>
+
+        <!-- ── Card 3 · TENET CTF · text LEFT / image RIGHT ── -->
+        <div data-award-left="3" style="position:absolute;top:0;left:0;width:50%;height:100%;transform:translateY(100%);overflow:hidden;background:transparent;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding:80px 64px;text-align:right;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.24em;color:var(--acc);margin-bottom:22px;">AISSMS IOIT, PUNE</span>
+          <div style="font-size:clamp(72px,10vw,140px);font-weight:900;letter-spacing:-0.05em;line-height:0.82;color:var(--acc);margin-bottom:18px;">2ND</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;color:var(--ink3);margin-bottom:24px;">RUNNER-UP</div>
+          <h3 style="font-size:clamp(26px,3.2vw,46px);font-weight:800;letter-spacing:-0.022em;margin:0 0 16px;line-height:1.1;">TENET CTF 2025</h3>
+          <p style="font-size:15px;line-height:1.68;color:var(--ink2);margin:0;max-width:380px;text-wrap:pretty;">Second runner-up at TENET CTF — consistent performance across forensics, cryptography, and web exploitation.</p>
+        </div>
+        <div data-award-right="3" style="position:absolute;top:0;left:50%;width:50%;height:100%;transform:translateY(-100%);overflow:hidden;background:#0b0e11;">
+          <img src="./photos/tenet-ctf-2025.jpg" alt="TENET CTF 2025" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;background:#0b0e11;z-index:1;border-left:1px solid var(--line);">
+          <div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;border-left:1px solid var(--line);">
+            <svg width="52" height="52" viewBox="0 0 52 52" fill="none"><rect x="1" y="1" width="50" height="50" rx="4" stroke="rgba(233,236,239,0.09)" stroke-width="1"></rect><circle cx="18" cy="17" r="5.5" stroke="rgba(233,236,239,0.09)" stroke-width="1"></circle><path d="M4 38l13-13 10 10 8-10 15 13" stroke="rgba(233,236,239,0.09)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;color:var(--ink3);">TENET_CTF_2025.jpg</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.14em;color:rgba(233,236,239,0.18);">REPLACE WITH YOUR IMAGE</span>
+          </div>
+        </div>
+
+        <!-- Counter -->
+        <div class="award-counter" style="position:absolute;bottom:26px;right:48px;z-index:10;">
+          <span data-award-count="" style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.16em;color:var(--ink3);">01 / 04</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════════════════ PATENTS ════════════════ -->
+    <section id="patents" data-section="patents" data-snap="" style="height:100vh;display:flex;flex-direction:column;justify-content:center;padding:66px 0 0;">
+      <div style="max-width:1200px;margin:0 auto;padding:0 48px;width:100%;">
+
+        <div data-reveal="" style="opacity:0;transform:translateY(14px);transition:opacity .7s,transform .7s;display:flex;align-items:center;gap:16px;margin-bottom:56px;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--acc);">05</span>
+          <div style="flex:1;height:1px;background:var(--line);"></div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;color:var(--ink3);">PATENTS · FILED 03</span>
+        </div>
+
+        
+          <div data-reveal="" style="opacity:0;transform:translateY(14px);transition:opacity .8s,transform .8s;border-bottom:1px solid var(--line);padding:34px 0;display:grid;grid-template-columns:110px 1fr auto;gap:32px;align-items:start;">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--acc);padding-top:4px;">PATENT 01</span>
+            <div>
+              <h3 style="font-size:clamp(17px,1.8vw,23px);font-weight:700;letter-spacing:-0.015em;margin:0 0 10px;line-height:1.2;">Agentic AI Framework for Project Evaluation</h3>
+              <p style="font-size:14px;line-height:1.65;color:var(--ink2);margin:0;max-width:600px;text-wrap:pretty;">Comprehensive project evaluation using the Model Context Protocol and Small Language Models.</p>
+            </div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.16em;color:var(--ink3);border:1px solid var(--line);padding:5px 10px;white-space:nowrap;">FILED</span>
+          </div>
+        
+          <div data-reveal="" style="opacity:0;transform:translateY(14px);transition:opacity .8s,transform .8s;border-bottom:1px solid var(--line);padding:34px 0;display:grid;grid-template-columns:110px 1fr auto;gap:32px;align-items:start;">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--acc);padding-top:4px;">PATENT 02</span>
+            <div>
+              <h3 style="font-size:clamp(17px,1.8vw,23px);font-weight:700;letter-spacing:-0.015em;margin:0 0 10px;line-height:1.2;">Tax-Efficient Portfolio Optimization</h3>
+              <p style="font-size:14px;line-height:1.65;color:var(--ink2);margin:0;max-width:600px;text-wrap:pretty;">An integrated system for portfolio optimization and behavioral profiling within the Indian regulatory context.</p>
+            </div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.16em;color:var(--ink3);border:1px solid var(--line);padding:5px 10px;white-space:nowrap;">FILED</span>
+          </div>
+        
+          <div data-reveal="" style="opacity:0;transform:translateY(14px);transition:opacity .8s,transform .8s;border-bottom:1px solid var(--line);padding:34px 0;display:grid;grid-template-columns:110px 1fr auto;gap:32px;align-items:start;">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--acc);padding-top:4px;">PATENT 03</span>
+            <div>
+              <h3 style="font-size:clamp(17px,1.8vw,23px);font-weight:700;letter-spacing:-0.015em;margin:0 0 10px;line-height:1.2;">Intelligent Orchestration for Peer Review</h3>
+              <p style="font-size:14px;line-height:1.65;color:var(--ink2);margin:0;max-width:600px;text-wrap:pretty;">A model for peer review through multi-dimensional analysis and optimized reviewer selection.</p>
+            </div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.16em;color:var(--ink3);border:1px solid var(--line);padding:5px 10px;white-space:nowrap;">FILED</span>
+          </div>
+        
+      </div>
+    </section>
+
+    <!-- ════════════════ LEADERSHIP & COMMUNITY ════════════════ -->
+    <section id="leadership" data-section="leadership" data-snap="" style="height:100vh;display:flex;flex-direction:column;justify-content:center;padding:66px 0 0;">
+      <div style="max-width:1200px;margin:0 auto;padding:0 48px;width:100%;">
+
+        <div data-reveal="" style="opacity:0;transform:translateY(14px);transition:opacity .7s,transform .7s;display:flex;align-items:center;gap:16px;margin-bottom:clamp(28px,5vh,56px);">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--acc);">06</span>
+          <div style="flex:1;height:1px;background:var(--line);"></div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;color:var(--ink3);">LEADERSHIP &amp; COMMUNITY</span>
+        </div>
+
+        
+          <div data-reveal="" style="opacity:0;transform:translateY(14px);transition:opacity .8s,transform .8s;border-bottom:1px solid var(--line);padding:clamp(18px,2.6vh,30px) 0;display:grid;grid-template-columns:200px 1fr auto;gap:32px;align-items:start;">
+            <div>
+              <div style="font-size:clamp(16px,1.5vw,20px);font-weight:700;letter-spacing:-0.01em;line-height:1.2;">Team Quark</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--acc);margin-top:7px;">Cybersecurity Coordinator</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;gap:12px;align-items:flex-start;"><span style="color:var(--acc);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.55;flex:none;">→</span><span style="font-size:14px;line-height:1.55;color:var(--ink2);text-wrap:pretty;">Managed the cybersecurity domain of the college tech club; recruited and trained a CTF competition team.</span></div>
+              <div style="display:flex;gap:12px;align-items:flex-start;"><span style="color:var(--acc);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.55;flex:none;">→</span><span style="font-size:14px;line-height:1.55;color:var(--ink2);text-wrap:pretty;">Co-organized an internal Capture The Flag competition to build peer interest in security.</span></div>
+            </div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.14em;color:var(--ink3);border:1px solid var(--line);padding:5px 10px;white-space:nowrap;">FEB 2025 — JUN 2025</span>
+          </div>
+        
+          <div data-reveal="" style="opacity:0;transform:translateY(14px);transition:opacity .8s,transform .8s;border-bottom:1px solid var(--line);padding:clamp(18px,2.6vh,30px) 0;display:grid;grid-template-columns:200px 1fr auto;gap:32px;align-items:start;">
+            <div>
+              <div style="font-size:clamp(16px,1.5vw,20px);font-weight:700;letter-spacing:-0.01em;line-height:1.2;">IEEE Student Branch</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--acc);margin-top:7px;">Technical Executive Committee</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;gap:12px;align-items:flex-start;"><span style="color:var(--acc);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.55;flex:none;">→</span><span style="font-size:14px;line-height:1.55;color:var(--ink2);text-wrap:pretty;">Ran technical logistics for IEEE Day 2025, coordinating 3 simultaneous event tracks.</span></div>
+              <div style="display:flex;gap:12px;align-items:flex-start;"><span style="color:var(--acc);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.55;flex:none;">→</span><span style="font-size:14px;line-height:1.55;color:var(--ink2);text-wrap:pretty;">Collaborated with student teams to deliver industry-level technical projects.</span></div>
+            </div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.14em;color:var(--ink3);border:1px solid var(--line);padding:5px 10px;white-space:nowrap;">AUG 2025 — MAY 2026</span>
+          </div>
+        
+          <div data-reveal="" style="opacity:0;transform:translateY(14px);transition:opacity .8s,transform .8s;border-bottom:1px solid var(--line);padding:clamp(18px,2.6vh,30px) 0;display:grid;grid-template-columns:200px 1fr auto;gap:32px;align-items:start;">
+            <div>
+              <div style="font-size:clamp(16px,1.5vw,20px);font-weight:700;letter-spacing:-0.01em;line-height:1.2;">Social Welfare &amp; Development Committee</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--acc);margin-top:7px;">Outreach Volunteer</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;gap:12px;align-items:flex-start;"><span style="color:var(--acc);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.55;flex:none;">→</span><span style="font-size:14px;line-height:1.55;color:var(--ink2);text-wrap:pretty;">Partnered with NGO Space ECE and led awareness drives across 10+ Pune communities.</span></div>
+              <div style="display:flex;gap:12px;align-items:flex-start;"><span style="color:var(--acc);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.55;flex:none;">→</span><span style="font-size:14px;line-height:1.55;color:var(--ink2);text-wrap:pretty;">Reached 500+ families over 10 weekends.</span></div>
+            </div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.14em;color:var(--ink3);border:1px solid var(--line);padding:5px 10px;white-space:nowrap;">JAN 2025 — MAR 2025</span>
+          </div>
+        
+      </div>
+    </section>
+
+    <!-- ════════════════ CERTIFICATIONS ════════════════ -->
+    <section id="certs" data-section="certs" data-snap="" style="height:100vh;display:flex;flex-direction:column;justify-content:center;padding:66px 0 0;">
+      <div style="max-width:1200px;margin:0 auto;padding:0 48px;width:100%;">
+
+        <div data-reveal="" style="opacity:0;transform:translateY(14px);transition:opacity .7s,transform .7s;display:flex;align-items:center;gap:16px;margin-bottom:clamp(28px,5vh,56px);">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--acc);">07</span>
+          <div style="flex:1;height:1px;background:var(--line);"></div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;color:var(--ink3);">CERTIFICATIONS</span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1px;background:var(--line2);">
+          
+            <div data-reveal="" style="opacity:0;transform:translateY(18px);transition:opacity .7s,transform .7s,background .25s;background:var(--bg);padding:clamp(28px,4vh,40px) 32px;display:flex;flex-direction:column;gap:14px;" class="cert-card">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;color:var(--acc);">GOOGLE</span>
+              <h3 style="font-size:clamp(19px,2vw,26px);font-weight:700;letter-spacing:-0.012em;margin:0;line-height:1.2;">Google Cybersecurity Certificate</h3>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.06em;color:var(--ink3);">Google · Professional Certificate</span>
+            </div>
+          
+            <div data-reveal="" style="opacity:0;transform:translateY(18px);transition:opacity .7s,transform .7s,background .25s;background:var(--bg);padding:clamp(28px,4vh,40px) 32px;display:flex;flex-direction:column;gap:14px;" class="cert-card">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;color:var(--acc);">CISCO</span>
+              <h3 style="font-size:clamp(19px,2vw,26px);font-weight:700;letter-spacing:-0.012em;margin:0;line-height:1.2;">Cisco Networking Basics</h3>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.06em;color:var(--ink3);">Cisco Networking Academy</span>
+            </div>
+          
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════ CONTACT ════════════════ -->
+    <section id="contact" data-section="contact" data-snap="" style="height:100vh;display:flex;flex-direction:column;justify-content:center;overflow:hidden;padding:66px 0 0;">
+      <div style="max-width:1200px;margin:0 auto;padding:0 48px;width:100%;">
+
+        <div data-reveal="" style="opacity:0;transform:translateY(14px);transition:opacity .7s,transform .7s;display:flex;align-items:center;gap:16px;margin-bottom:clamp(22px,4vh,48px);">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--acc);">08</span>
+          <div style="flex:1;height:1px;background:var(--line);"></div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;color:var(--ink3);">CONTACT</span>
+        </div>
+
+        <div style="margin-bottom:clamp(24px,4vh,52px);">
+          <div style="overflow:hidden;margin-bottom:4px;">
+            <h2 data-wipe="" style="font-size:clamp(44px,7.5vw,104px);font-weight:900;letter-spacing:-0.047em;line-height:0.88;margin:0;transform:translateY(108%);transition:transform 1.15s cubic-bezier(.16,1,.3,1);">Let's secure</h2>
+          </div>
+          <div style="overflow:hidden;padding-bottom:0.04em;">
+            <h2 data-wipe="" data-wipe-delay="80" style="font-size:clamp(44px,7.5vw,104px);font-weight:900;letter-spacing:-0.047em;line-height:0.88;margin:0;padding-bottom:0.16em;color:var(--acc);transform:translateY(108%);transition:transform 1.15s cubic-bezier(.16,1,.3,1) 80ms;">something.</h2>
+          </div>
+          <p data-reveal="" style="opacity:0;transform:translateY(14px);transition:opacity .8s .22s,transform .8s .22s;margin:clamp(18px,2.6vh,30px) 0 0;font-size:16px;line-height:1.6;color:var(--ink2);max-width:460px;text-wrap:pretty;">Open to security research, CTF collaboration, and engineering roles in application security and digital forensics.</p>
+        </div>
+
+        <!-- Animated social icons — converge into a row on scroll, each linked to its site -->
+        <div style="border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 0 6px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;color:var(--ink3);text-align:center;">CONNECT</div>
+          <div id="social-row" style="display:flex;justify-content:center;align-items:flex-start;flex-wrap:wrap;gap:clamp(36px,7vw,96px);padding:clamp(28px,4.5vh,52px) 0 clamp(24px,4vh,48px);perspective:700px;">
+            
+              <a data-social-icon="" href="mailto:amoghtoshniwal@gmail.com" target="_blank" rel="noopener" title="EMAIL · amoghtoshniwal@gmail.com" aria-label="EMAIL — amoghtoshniwal@gmail.com" style="text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:15px;opacity:0;will-change:transform,opacity;">
+                <img src="https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/gmail.svg" alt="EMAIL" style="width:clamp(42px,4.6vw,64px);height:clamp(42px,4.6vw,64px);object-fit:contain;filter:invert(0.66);transition:filter .3s;" class="social-ico" loading="lazy">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.18em;color:var(--ink3);">EMAIL</span>
+              </a>
+            
+              <a data-social-icon="" href="https://github.com/FireFlamingo" target="_blank" rel="noopener" title="GITHUB · FireFlamingo" aria-label="GITHUB — FireFlamingo" style="text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:15px;opacity:0;will-change:transform,opacity;">
+                <img src="https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/github.svg" alt="GITHUB" style="width:clamp(42px,4.6vw,64px);height:clamp(42px,4.6vw,64px);object-fit:contain;filter:invert(0.66);transition:filter .3s;" class="social-ico" loading="lazy">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.18em;color:var(--ink3);">GITHUB</span>
+              </a>
+            
+              <a data-social-icon="" href="https://www.linkedin.com/in/amoghtoshniwal" target="_blank" rel="noopener" title="LINKEDIN · in/amoghtoshniwal" aria-label="LINKEDIN — in/amoghtoshniwal" style="text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:15px;opacity:0;will-change:transform,opacity;">
+                <img src="https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/linkedin.svg" alt="LINKEDIN" style="width:clamp(42px,4.6vw,64px);height:clamp(42px,4.6vw,64px);object-fit:contain;filter:invert(0.66);transition:filter .3s;" class="social-ico" loading="lazy">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.18em;color:var(--ink3);">LINKEDIN</span>
+              </a>
+            
+              <a data-social-icon="" href="https://tryhackme.com/p/FireFlamingo7" target="_blank" rel="noopener" title="TRYHACKME · FireFlamingo7" aria-label="TRYHACKME — FireFlamingo7" style="text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:15px;opacity:0;will-change:transform,opacity;">
+                <img src="https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/tryhackme.svg" alt="TRYHACKME" style="width:clamp(42px,4.6vw,64px);height:clamp(42px,4.6vw,64px);object-fit:contain;filter:invert(0.66);transition:filter .3s;" class="social-ico" loading="lazy">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.18em;color:var(--ink3);">TRYHACKME</span>
+              </a>
+            
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-top:clamp(24px,4vh,48px);padding-top:24px;border-top:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.11em;color:var(--ink3);">
+          <span>© 2026 AMOGH TOSHNIWAL</span>
+          <span>PUNE, INDIA · 18.52°N / 73.85°E</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+</body>
+</html>
