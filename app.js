@@ -211,6 +211,59 @@
     discRow2.style.transform = 'translateX(' + (-travel + p * travel).toFixed(1) + 'px)';
   }
 
+  // ── Email → copy to clipboard (with toast) ──────────────────────
+  var toastEl = null, toastTimer = 0;
+  function showToast(msg) {
+    if (!toastEl) {
+      toastEl = document.createElement('div');
+      toastEl.setAttribute('role', 'status');
+      toastEl.setAttribute('aria-live', 'polite');
+      toastEl.style.cssText = 'position:fixed;left:50%;bottom:32px;z-index:80;display:flex;align-items:center;gap:9px;' +
+        'background:#0E1116;border:1px solid rgba(141,206,224,0.35);color:#E9ECEF;' +
+        "font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.08em;" +
+        'padding:11px 16px;box-shadow:0 10px 34px rgba(0,0,0,0.55);pointer-events:none;' +
+        'opacity:0;transform:translateX(-50%) translateY(12px);transition:opacity .25s ease,transform .25s ease;';
+      document.body.appendChild(toastEl);
+    }
+    toastEl.innerHTML = '<span style="color:#8DCEE0;">✓</span><span></span>';
+    toastEl.lastChild.textContent = msg;
+    requestAnimationFrame(function () {
+      toastEl.style.opacity = '1';
+      toastEl.style.transform = 'translateX(-50%) translateY(0)';
+    });
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastEl.style.opacity = '0';
+      toastEl.style.transform = 'translateX(-50%) translateY(12px)';
+    }, 2200);
+  }
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+    return new Promise(function (resolve, reject) {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.style.position = 'fixed'; ta.style.top = '-9999px'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.focus(); ta.select();
+        var ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        ok ? resolve() : reject();
+      } catch (e) { reject(e); }
+    });
+  }
+  function setupMailCopy() {
+    if (!root) return;
+    root.querySelectorAll('a[href^="mailto:"]').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        var email = a.getAttribute('href').replace(/^mailto:/, '').split('?')[0];
+        copyText(email).then(
+          function () { showToast('Email copied — ' + email); },
+          function () { showToast(email); }
+        );
+      });
+    });
+  }
+
   // ── Anchor navigation ───────────────────────────────────────────
   function onNavClick(e) {
     if (!root) return;
@@ -324,7 +377,7 @@
     requestAnimationFrame(function () {
       setupReveal(); tickReveal();
       setupHorizontal(); setupAwards(); setupDisc(); setupSocial();
-      bindNav(); setupMenu(); onScroll();
+      bindNav(); setupMenu(); setupMailCopy(); onScroll();
     });
     setTimeout(setupHorizontal, 400);
     setTimeout(setupHorizontal, 1400);
